@@ -170,7 +170,6 @@ int main(){
 	string ans = get_all_clauses(temp1, temp2, all_matches);
 
 	cout<<ans;
-
 	return 0;
 }
 
