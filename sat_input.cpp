@@ -1,16 +1,13 @@
-#include <bits/stdc++.h>
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
 #include <utility>
+#include "getAdMatrix.h"
 
 using namespace std;
 
-vector<vector<bool> > g_mail;  //size n_mail square
-vector<vector<bool> > g_phone;	//size m_phone square
-
-int n=3;  //size of g_mail    value_set
-int m=4;	//size of g_phone  value_set
+int n=3;//size of g_mail    value_set
+int m=4;//size of g_phone  value_set
 
 // vector<vector<int> > all_matches;   //size mPn * n
 
@@ -30,7 +27,7 @@ string get_ind_edge(int graph, int i, int j){
 		return to_string(((i-1)*n)+j);
 	}
 	else{
-		return to_string((n*n) + ((i-1)*n)+j);
+		return to_string((n*n) + ((i-1)*m)+j);
 	}
 }
 
@@ -94,7 +91,8 @@ string get_all_clauses(vector<vector<bool> > g_mail, vector<vector<bool> > g_pho
 				clause = clause + "-" + get_ind_edge(1,i,j) + " 0\n";
 		}
 	}
-	cout<<clause<<endl;
+	// cout << "first Graph condition" << endl;
+	// cout<<clause<<endl;
 
 	for(int i=1; i<=m; i++){
 		for(int j=1; j<=m; j++){
@@ -105,9 +103,11 @@ string get_all_clauses(vector<vector<bool> > g_mail, vector<vector<bool> > g_pho
 				clause = clause + "-" + get_ind_edge(2,i,j) + " 0\n";
 		}
 	}
-	cout<<clause<<endl;
+	// cout << "second Graph condition" << endl;
+	// cout<<clause<<endl;
+	// cout << "main Conditions" << endl;
 	for(int i=0; i<all_matches.size(); i++){
-		clause = clause + match_clauses(i, g_mail, all_matches) +"\n";
+		clause = clause + match_clauses(i, g_mail, all_matches);
 	}
 	return clause;
 }
@@ -140,36 +140,67 @@ vector<int> get_all_matches(int n, vector<int> vect){		//initially
 	return ans;
 }
 
-int main(){
+void mainFunction(string filename)
+{
+	// vector<vector<bool> > temp1{{false, true, false},		//value_set
+	// 							{false, false, false},
+	// 							{false, true, false}};
+
+	// vector<vector<bool> > temp2{{false, true, true, true},		//value_set
+	// 							{false, false, false, false},
+	// 							{false, true, false, false},
+	// 							{false, true, false, false}};
+
+	GRAPHS gboth;
+	gboth = readFile(filename);
+	vector<vector<bool> > g_mail;
+	vector<vector<bool> > g_phone;
+
+	g_phone = gboth.first;
+	g_mail = gboth.second;
+
+	n = g_mail.size();
+	m = g_phone.size();
 
 	vector<int> input;
 	vector<int> all_matches;
-	vector<vector<bool> > temp1{{false, true, false},		//value_set
-								{false, false, false},
-								{false, true, false}};
-
-	vector<vector<bool> > temp2{{false, true, true, true},		//value_set
-								{false, false, false, false},
-								{false, true, false, false},
-								{false, true, false, false}};
-
-	// g_mail = temp1;
-	// g_phone = temp2;
 
 	for(int i=0; i<m; i++){
 		input.push_back(i+1);		
 	}
 
-	all_matches = get_all_matches(3,input);
+	all_matches = get_all_matches(n,input);
 
-	// for(int i=0; i<all_matches.size(); i++){
-	// 	cout<<all_matches[i]<<endl;
-	// }
 	cout<<"size of all_matches: "<<all_matches.size()<<endl;
 
-	string ans = get_all_clauses(temp1, temp2, all_matches);
+	//get clauses
+	string ans = get_all_clauses(g_mail, g_phone, all_matches);
 
 	cout<<ans;
+
+	int noOfClauses = 0;
+	for (int i = 0; i < ans.length(); i++)
+	{
+		if(ans[i]=='\n')
+		{
+			noOfClauses++;
+		}
+	}
+	
+	//printing in a file
+	int total_vars = n*n + m*m + all_matches.size();
+	ofstream outfile;
+	outfile.open("test.satinput");
+
+	outfile << "c Here is a comment." << endl;
+	outfile << "p cnf " << total_vars << " " << noOfClauses << endl;
+	outfile << ans << endl;
+
+	outfile.close();
+}
+int main(){
+
+	mainFunction("test.graphs");
 	return 0;
 }
 

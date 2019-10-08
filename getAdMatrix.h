@@ -1,3 +1,6 @@
+#ifndef GETADMATRIX_H
+#define GETADMATRIX_H
+
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
@@ -69,7 +72,7 @@ GRAPHS readFile(string filename)
 }
 
 
-void printMap(vector<vector<bool>> graph)
+void printMatrix(vector<vector<bool>> graph)
 {
     for (int i = 0; i < graph.size(); i++)
     {
@@ -83,12 +86,5 @@ void printMap(vector<vector<bool>> graph)
     }
 }
 
-int main(int argc, char const *argv[])
-{
-    GRAPHS infos;
 
-    infos = readFile("testcase.txt");
-    printMap(infos.second);
-
-    return 0;
-}
+#endif
