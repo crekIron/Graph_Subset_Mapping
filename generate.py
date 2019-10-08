@@ -78,31 +78,43 @@ def renameGraph(N, Graph):
     NewGraph.append( (n1,n2) )
   return NewGraph
 
-def printSubgraphs(G1,G2):
+def printSubgraphs(G1,G2,file):
   print "digraph {"
-
+  file.write("digraph {")
   print '\tsubgraph clusterG1 { graph [label="G"]'
+  file.write('\tsubgraph clusterG1 { graph [label="G"]')
   for e in G1:
     print "\t\t",  "G"+str(e[0]), "->", "G"+str(e[1])
+    file.write("\t\t",  "G"+str(e[0]), "->", "G"+str(e[1]))
   print "\t}"
+  file.write("\t}")
 
   print '\tsubgraph clusterG2 { graph [label="g"]'
+  file.write('\tsubgraph clusterG2 { graph [label="g"]')
   for e in G2:
     print "\t\t",  "g"+str(e[0]), "->", "g"+str(e[1])
+    file.write("\t\t",  "g"+str(e[0]), "->", "g"+str(e[1]))
   print "\t}"
-
+  file.write("\t}")
   print "}"
+  file.write("}")
 
 
 def printDigraph():
   print "digraph {"
+  # file.write("digraph {")
   for e in edges:
     print "\t",  e[0], "->", e[1]
+    # file.write("\t",  e[0], "->", e[1])
   print "}"
+  # file.write("}")
 
-def printGraph(edges):
+def printGraph(edges, file):
   for e in edges:
     print e[0], e[1]
+    file.write("%d " % e[0])
+    file.write("%d" % e[1])
+    file.write("\n")
 
 def main():
 
@@ -112,12 +124,16 @@ def main():
     G2 = renameGraph(G2nodes,G2)
   else:   # G1 and G2 are both random graphs
     G1 = makeGraph(G1nodes,G1edges)
+
+  f= open("test.graphs","w+")
+
   if print_digraph:
-    printSubgraphs(G1,G2)
+    printSubgraphs(G1,G2,f)
   else:
-    printGraph( G1 )
+    printGraph( G1,f )
     print "0 0"
-    printGraph( G2 )
+    f.write("0 0 \n")
+    printGraph( G2,f )
 
 if __name__ == "__main__":
     main()
