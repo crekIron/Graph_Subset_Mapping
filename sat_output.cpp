@@ -3,8 +3,16 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <chrono> 
+#include <ctime> 
 
 using namespace std;
+
+struct Edge
+{   
+    int parent;
+    int child;
+};
 
 void remove(int val, vector<int> &v ){
 	vector<int>::iterator ptr; 
@@ -102,8 +110,8 @@ void readSatOutput(string filename)
 		}
 
 		int x;
-		int num = -1;                   //the key
-		vector<int> edgs;
+		Edge num;                   //the key
+		vector<Edge> edgs;
 		bool nextGraph = false;
 		int m = 0;
 		int n = 0;
@@ -117,10 +125,12 @@ void readSatOutput(string filename)
 			{
 				if(n<x) n = x;
 			}
-			num = int(x)*10;
+
+			num.parent = x;
 			GraphInputFile>>x;
-			num = num +x;
-			if (num == 0)
+			num.child = x;
+
+			if (num.parent == 0 && num.child == 0)
 				nextGraph = true;
 			if(!nextGraph)
 			{
@@ -130,7 +140,6 @@ void readSatOutput(string filename)
 			{
 				if(n<x) n = x;
 			}
-			edgs.push_back(num);
 		}
 		GraphInputFile.close();
 		
@@ -152,6 +161,11 @@ void readSatOutput(string filename)
 		}
 		cout << n << " " << m << endl;
 		//I got that variable in correct ans
+		if (correctAns == 0)
+		{
+			cout << "some problem in here" << endl;
+		}
+		
 		correctAns = correctAns - n*n - m*m;
 		int temp = correctAns;
 		int match = 0;
@@ -191,6 +205,10 @@ void readSatOutput(string filename)
 
 int main(int argc, char const *argv[])
 {
+	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = start - start; 
 	readSatOutput("test.satoutput");
+	elapsed_seconds = elapsed_seconds + std::chrono::system_clock::now()-start;  
+	cout << "elapsed time for reading the output of MiniSat: " << elapsed_seconds.count() << "s\n"; 
 	return 0;
 }

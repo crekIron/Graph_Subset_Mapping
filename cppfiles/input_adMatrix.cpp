@@ -8,6 +8,12 @@ using namespace std;
 
 #define GRAPHS pair<vector<vector<bool>>, vector<vector<bool>>> 
 
+struct Edge
+{   
+    int parent;
+    int child;
+};
+
 GRAPHS readFile(string filename)
 {
     ifstream inFile;
@@ -20,8 +26,8 @@ GRAPHS readFile(string filename)
     }
 
     int x;
-    int num = -1;                   //the key
-    vector<int> edgs;
+    Edge num;                   //the key
+    vector<Edge> edgs;
     bool nextGraph = false;
     int tvers1 = 0;
     int tvers2 = 0;
@@ -35,10 +41,12 @@ GRAPHS readFile(string filename)
         {
             if(tvers2<x) tvers2 = x;
         }
-        num = int(x)*10;
+
+        num.parent = x;
         inFile>>x;
-        num = num +x;
-        if (num == 0)
+        num.child = x;
+
+        if (num.parent == 0 && num.child == 0)
             nextGraph = true;
         if(!nextGraph)
         {
@@ -55,14 +63,14 @@ GRAPHS readFile(string filename)
     vector<vector<bool>> Gemail(tvers2, vector<bool>(tvers2,false)); //if there is an edge from 1->2 then Gemail[12]=1
     vector<vector<bool>> Gphone(tvers1, vector<bool>(tvers1,false));
     int i=0;
-    for (i = 0; i < edgs.size() && edgs[i]!=0; i++)
+    for (i = 0; i < edgs.size() && edgs[i].parent!=0; i++)
     {
-        Gphone[edgs[i]/10-1][edgs[i]%10-1] = true;
+        Gphone[edgs[i].parent-1][edgs[i].child-1] = true;
     }
     i++;
-    for (;i < edgs.size() && edgs[i]!=0; i++)
+    for (;i < edgs.size() && edgs[i].parent!=0; i++)
     {
-        Gemail[edgs[i]/10-1][edgs[i]%10-1] = true;
+        Gemail[edgs[i].parent-1][edgs[i].child-1] = true;
     }
 
     return make_pair(Gphone, Gemail);
@@ -87,7 +95,7 @@ int main(int argc, char const *argv[])
 {
     GRAPHS infos;
 
-    infos = readFile("testcase.txt");
+    infos = readFile("../test.graphs");
     printMatrix(infos.second);
 
     return 0;

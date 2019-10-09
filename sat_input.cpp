@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <utility>
 #include "getAdMatrix.h"
+#include <chrono> 
+#include <ctime> 
 
 using namespace std;
 
@@ -106,6 +108,12 @@ string get_all_clauses(vector<vector<bool> > g_mail, vector<vector<bool> > g_pho
 	// cout << "second Graph condition" << endl;
 	// cout<<clause<<endl;
 	// cout << "main Conditions" << endl;
+	int st = n*n + m*m;
+	for (int i = 0; i < all_matches.size(); i++)
+	{
+		clause = clause + to_string(st+i+1) + " ";
+	}
+	clause = clause + "0\n";
 	for(int i=0; i<all_matches.size(); i++){
 		clause = clause + match_clauses(i, g_mail, all_matches);
 	}
@@ -119,7 +127,7 @@ vector<int> get_all_matches(int n, vector<int> vect){		//initially
 		ans = vect;
 		return ans;
 	}
-	cout<<n<<endl;
+	// cout<<n<<endl;
 	vector<int> temp = vect;
 	vector<int> remain;
 	int ten = 1;
@@ -150,7 +158,8 @@ void mainFunction(string filename)
 	// 							{false, false, false, false},
 	// 							{false, true, false, false},
 	// 							{false, true, false, false}};
-
+	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = start - start; 
 	GRAPHS gboth;
 	gboth = readFile(filename);
 	vector<vector<bool> > g_mail;
@@ -158,7 +167,10 @@ void mainFunction(string filename)
 
 	g_phone = gboth.first;
 	g_mail = gboth.second;
-
+    elapsed_seconds = elapsed_seconds + std::chrono::system_clock::now()-start;  
+	start = std::chrono::system_clock::now();
+	cout << "elapsed time for reading the input: " << elapsed_seconds.count() << "s\n"; 
+	
 	n = g_mail.size();
 	m = g_phone.size();
 
@@ -171,12 +183,15 @@ void mainFunction(string filename)
 
 	all_matches = get_all_matches(n,input);
 
-	cout<<"size of all_matches: "<<all_matches.size()<<endl;
+	cout<<"size of all_matches: "<<all_matches.size()<<endl;  
 
 	//get clauses
 	string ans = get_all_clauses(g_mail, g_phone, all_matches);
 
 	cout<<ans;
+    elapsed_seconds = elapsed_seconds + std::chrono::system_clock::now()-start; 
+	start = std::chrono::system_clock::now();
+	cout << "elapsed time for getting all clauses: " << elapsed_seconds.count() << "s\n"; 
 
 	int noOfClauses = 0;
 	for (int i = 0; i < ans.length(); i++)
@@ -197,6 +212,10 @@ void mainFunction(string filename)
 	outfile << ans << endl;
 
 	outfile.close();
+    elapsed_seconds = elapsed_seconds + std::chrono::system_clock::now()-start; 
+	start = std::chrono::system_clock::now();  
+	cout << "elapsed time for printing all clauses in a file: " << elapsed_seconds.count() << "s\n"; 
+
 }
 int main(){
 
