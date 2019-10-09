@@ -1,8 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #include <unordered_map>
 #include <utility>
-#include "getAdMatrix.h"
+#include "getAdMatrixAndDegree.h"
 
 using namespace std;
 
@@ -224,7 +225,7 @@ void mainFunction(string filename)
 	// 							{false, true, false, false},
 	// 							{false, true, false, false}};
 
-	GRAPHS gboth;
+	GINFO gboth;
 	gboth = readFile(filename);
 	vector<vector<bool> > g_mail;
 	vector<vector<bool> > g_phone;
@@ -235,8 +236,11 @@ void mainFunction(string filename)
 	print_matrix(g_phone);
 	print_matrix(g_mail);
 
-	g_phone = gboth.first;
-	g_mail = gboth.second;
+	g_phone = gboth.first.first;
+	g_mail = gboth.first.second;
+
+	deg_phone = gboth.second.first;
+	deg_mail = gboth.second.second;
 
 	//assign deg_mail and deg_phone change
 
@@ -254,10 +258,19 @@ void mainFunction(string filename)
 
 	// cout<<"size of all_matches: "<<all_matches.size()<<endl;
 
+	auto start = std::chrono::system_clock::now();
 	//get clauses
 	string ans = get_all_clauses(g_mail, g_phone, deg_mail, deg_phone);
 
+	auto end = std::chrono::system_clock::now();
+ 
 	cout<<ans;
+
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+ 
+    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+
 
 	int noOfClauses = 0;
 	for (int i = 0; i < ans.length(); i++)
@@ -269,7 +282,7 @@ void mainFunction(string filename)
 	}
 	
 	//printing in a file
-	int total_vars = n*n + m*m + all_matches.size();
+	int total_vars = n*n + m*m + n*m;
 	ofstream outfile;
 	outfile.open("test.satinput");
 
