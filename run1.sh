@@ -1,1 +1,1 @@
-./sat_input.out
+./sat_input.out $1

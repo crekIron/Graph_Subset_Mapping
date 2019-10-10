@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -66,7 +67,7 @@ int get_match(int *match, int n, vector<int> vect){		//initially
 void readSatOutput(string filename)
 {
 	ifstream inFile;
-	inFile.open(filename);
+	inFile.open(filename+".satoutput");
 
 	if (!inFile)
 	{
@@ -78,9 +79,9 @@ void readSatOutput(string filename)
 	inFile >> success;
 	if (success == "UNSAT")
 	{
-		cout << "0" << endl;
+		// cout << "0" << endl;
 		ofstream outfile;
-		outfile.open("test.mapping");
+		outfile.open(filename+".mapping");
 
 		outfile << "0" << endl;
 
@@ -101,7 +102,7 @@ void readSatOutput(string filename)
 
 		// to find n and m
 		ifstream GraphInputFile;
-		GraphInputFile.open("test.graphs");
+		GraphInputFile.open(filename+".graphs");
 
 		if (!GraphInputFile)
 		{
@@ -151,11 +152,11 @@ void readSatOutput(string filename)
 		3. and then all_matches alog to find that particular match
 		 */
 		// int totalinit = n*n + m*m;
-		int totalinit = n*n + m*m + m;
+		int totalinit =  m;
 		string ans;
 		int row = 0;
 		int column = 0;
-        cout << totalinit << " " <<assignments.size() << endl;
+        // cout << totalinit << " " <<assignments.size() << endl;
 
 		for (int i = totalinit; i < assignments.size(); i+=m)
 		{
@@ -163,7 +164,7 @@ void readSatOutput(string filename)
 			for (int j = i; j < i+m; j++)
 			{
 
-                cout << assignments[j] << endl;
+                // cout << assignments[j] << endl;
 				if (assignments[j]>0)
 				{
 					ans = ans + to_string(row+1) + " " + to_string(column+1) + "\n";
@@ -174,12 +175,12 @@ void readSatOutput(string filename)
 			row = row + 1;
 		}
 		
-        cout << "yo" <<endl;
-		cout << ans;
+  //       cout << "yo" <<endl;
+		// cout << ans;
 		ofstream outfile;
-		outfile.open("test.mapping");
+		outfile.open(filename + ".mapping");
 
-		outfile << ans << endl;
+		outfile << ans.substr(0,ans.length()-1);
 
 		outfile.close();
 	}
@@ -189,7 +190,7 @@ int main(int argc, char const *argv[])
 {
 	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = start - start; 
-	readSatOutput("test.satoutput");
+	readSatOutput(string(argv[1]));
 	elapsed_seconds = elapsed_seconds + std::chrono::system_clock::now()-start;  
 	cout << "elapsed time for reading the output of MiniSat: " << elapsed_seconds.count() << "s\n"; 
 	return 0;

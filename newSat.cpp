@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <chrono>
 #include <unordered_map>
 #include <utility>
@@ -33,7 +34,14 @@ string get_ind_edge(int graph, int i, int j){
 }
 
 string get_ind_match(int i, int j){
-	return to_string((n*n)+(m*m)+((i-1)*m)+j) ;	//if match_numb is the index
+	return to_string(m+((i-1)*m)+j) ;	//if match_numb is the index
+	// return to_string((n*n)+(m*m)+m+((i-1)*m)+j) ;
+}
+
+string has_mail(int j){
+	return to_string(j);
+	// return to_string((n*n)+(m*m)+j);
+
 }
 
 unordered_map<int, int> get_hashmap(int numb){
@@ -80,11 +88,10 @@ unordered_map<int, int> get_hashmap(int numb){
 // 	return clause;
 // }
 
-
 string atleast_one_clause(int ind){
 	string clause = "";
-	for(int i=0; i<m; i++){
-		clause = clause + get_ind_match(ind,i+1) + " ";
+	for(int i=1; i<=m; i++){
+		clause = clause + get_ind_match(ind,i) + " ";
 	}
 	clause = clause + "0\n";
 	return clause;
@@ -92,7 +99,7 @@ string atleast_one_clause(int ind){
 }
 
 
-string only_one_clause(int ind){
+string only_one_clause_n(int ind){
 	string clause = "";
 	for(int i=1; i<=m; i++){
 		for(int j=i+1; j<=m; j++){
@@ -102,33 +109,123 @@ string only_one_clause(int ind){
 	return clause;
 }
 
+string only_one_clause_m(int ind){
+	string clause = "";
+	for(int i=1; i<=n; i++){
+		for(int j=i+1; j<=n; j++){
+			clause = clause + "-" + get_ind_match(i,ind) + " -" + get_ind_match(j,ind) + " 0\n";
+		}
+	}
+	return clause;
+}
+
+
+
+string has_mail_clause(int ind){
+	string clause = "";
+	for(int i=1; i<=n; i++){
+		clause = clause + "-" + get_ind_match(i,ind) + " " + has_mail(ind) + " 0\n";
+	}
+
+	clause = clause + "-" + has_mail(ind);
+	for(int i=1; i<=n; i++){
+		clause = clause + " " + get_ind_match(i,ind);
+	}
+	clause = clause + " 0\n";
+	return clause;
+}
+
+bool no_incoming(int ind, int graph,vector<vector<bool> > g_mail, vector<vector<bool> > g_phone){
+	if(graph==1){
+		for(int i=0; i<n; i++){
+			if(g_mail[i][ind-1])
+				return false;
+		}
+	}
+	else{
+		for(int i=0; i<m; i++){
+			if(g_phone[i][ind-1])
+				return false;
+			}
+	}
+	
+	return true;
+}
+
+
 string edge_clauses(vector<vector<bool> > g_mail, vector<vector<bool> > g_phone, vector<int> deg_mail, vector<int> deg_phone){
 
 	string clause = "";
+
+	int nextj = 0;
+	int p = 1;
+	// for(int i=1; i<=n; i++){
+	// 	if ((deg_mail[i-1]==0)&& no_incoming(i,1, g_mail, g_phone))
+	// 	{
+	// 		// cout<<"isolated: "<<i<<endl;
+	// 		if(p>m){
+	// 			return "";
+	// 		}
+	// 		for(int j=p; j<=m; j++){
+	// 			if ((deg_phone[j-1]==0) && no_incoming(j,2, g_mail, g_phone))
+	// 			{
+	// 				// cout<<"isolated match: "<<i<<" "<<j<<endl;
+	// 				clause = clause + get_ind_match(i,j)+ " 0\n";
+	// 				p=j+1;
+	// 				break;	
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 	for(int i=1; i<=n; i++){
-		for(int j=1; j<=n; j++){
-			for(int a=1; a<=m; a++){
-				for(int b=1; b<=m; b++){
-					if(i!=j){
-						if(a!=b){
-							if(deg_mail[i-1]>deg_mail[a-1]){
-								clause = clause + "-" + get_ind_match(i,a) + " 0\n";
-								if(deg_mail[j-1] > deg_mail[b-1])
-									clause = clause + "-" + get_ind_match(j,b) + " 0\n";
+		if((deg_mail[i-1]==0) && no_incoming(i,1, g_mail, g_phone)){
+				if(p>m){
+					return "";
+				}
+				for(int j=p; j<=m; j++){
+					if ((deg_phone[j-1]==0) && no_incoming(j,2, g_mail, g_phone))
+					{
+						// cout<<"isolated match: "<<i<<" "<<j<<endl;
+						clause = clause + get_ind_match(i,j)+ " 0\n";
+						p=j+1;
+						break;	
+					}
+				}
+				continue;
+			}
+		for(int j=1; j<=m; j++){
+			if(deg_mail[i-1]>deg_phone[j-1])
+				clause = clause + "-"+get_ind_match(i,j)+ " 0\n";
+			else{
+				bool unsat = false;
+				
+				if(!unsat){
+					for(int k=1; k<=n; k++){
+						if(g_mail[i-1][k-1]){
+							clause = clause + "-"+get_ind_match(i,j);
+							
+							for(int l=1; l<=m; l++){
+								if(g_phone[j-1][l-1] && deg_mail[k-1]<=deg_phone[l-1])
+									// cout<<i<<"->"<<j<<" then "<<k<<"->"<<l<<endl;
+									clause = clause + " " + get_ind_match(k,l);
 							}
-							else if(deg_mail[j-1] > deg_mail[b-1])
-								clause = clause + "-" + get_ind_match(j,b) + " 0\n";
-							else if(g_mail[i-1][j-1]){
-								// if(g_phone(a-1,b-1)){
-								clause = clause + "-" + get_ind_edge(1,i,j) + " -" + get_ind_match(i,a) + " -" + get_ind_match(j,b) + get_ind_edge(2,a,b) +" 0\n";
-								// }
+							clause = clause + " 0\n";
+						}
+					}
+					for(int l=1; l<=m; l++){
+						if(g_phone[j-1][l-1]){
+							clause = clause + "-"+get_ind_match(i,j) + " -" + has_mail(l);
+							for(int k=1; k<=n; k++){
+								if(g_mail[i-1][k-1] && deg_mail[k-1]<=deg_phone[l-1]){
+									clause = clause + " " + get_ind_match(k,l);
+								}
 							}
-							else{
-								clause = clause + get_ind_edge(1,i,j) + " -" + get_ind_match(i,a) + " -" + get_ind_match(j,b) + " -" + get_ind_edge(2,a,b) +" 0\n";
-							}
+							clause = clause + " 0\n";
 						}
 					}
 				}
+				
 			}
 		}
 	}
@@ -140,39 +237,30 @@ string edge_clauses(vector<vector<bool> > g_mail, vector<vector<bool> > g_phone,
 string get_all_clauses(vector<vector<bool> > g_mail, vector<vector<bool> > g_phone, vector<int> deg_mail, vector<int> deg_phone){
 	string clause = "";
 
-	for(int i=1; i<=n; i++){
-		for(int j=1; j<=n; j++){
-			// cout<<get_ind_edge(1,i,j)<<endl;
-			if(g_mail[i-1][j-1])
-				clause = clause + get_ind_edge(1,i,j) + " 0\n";
-			else
-				clause = clause + "-" + get_ind_edge(1,i,j) + " 0\n";
-		}
-	}
-	// cout << "first Graph condition" << endl;
-	// cout<<clause<<endl;
+	// for(int i=1; i<=n; i++){
+	// 	clause = clause + atleast_one_clause(i);		//O(n_m)
+	// }
 
-	for(int i=1; i<=m; i++){
-		for(int j=1; j<=m; j++){
-			// cout<<get_ind_edge(1,i,j)<<endl;
-			if(g_phone[i-1][j-1])
-				clause = clause + get_ind_edge(2,i,j) + " 0\n";
-			else
-				clause = clause + "-" + get_ind_edge(2,i,j) + " 0\n";
-		}
-	}
-	// cout << "second Graph condition" << endl;
-	// cout<<clause<<endl;
-	// cout << "main Conditions" << endl;
-	for(int i=0; i<n; i++){
-		clause = clause + atleast_one_clause(i);		//O(n_m)
-	}
+	// // cout<<"atleast one done"<<endl;
+	// for(int i=1; i<=n; i++){											
+	// 	clause = clause + only_one_clause_n(i);			//O(n*m^2)
+	// }
 
-	for(int i=0; i<n; i++){											
-		clause = clause + only_one_clause(i);			//O(n*m^2)
-	}
 
-	clause = clause + edge_clauses(g_mail, g_phone, deg_mail, deg_phone);
+	// // cout<<"atleast one done"<<endl;
+	// for(int i=1; i<=m; i++){											
+	// 	clause = clause + only_one_clause_m(i);			//O(m*n^2)
+	// }
+
+	// for(int i=1; i<=m; i++){
+	// 	clause = clause + has_mail_clause(i);	
+	// }
+
+	// cout<<"only one done"<<endl;
+	string edgeClauses = edge_clauses(g_mail, g_phone, deg_mail, deg_phone);
+	if(edgeClauses.length()==0)
+		clause = "0";
+	else clause = clause + edgeClauses;
 
 
 	return clause;
@@ -209,7 +297,7 @@ string get_all_clauses(vector<vector<bool> > g_mail, vector<vector<bool> > g_pho
 void print_matrix(vector<vector<bool> > a){
 	for(int i=0; i<a.size(); i++){
 		for(int j=0; j<a[i].size(); j++)
-			cout<<a[i][j]<<" next";
+			cout<<a[i][j]<<" " ;
 		cout<<endl;
 	}
 }
@@ -226,15 +314,12 @@ void mainFunction(string filename)
 	// 							{false, true, false, false}};
 
 	GINFO gboth;
-	gboth = readFile(filename);
+	gboth = readFile(filename + ".graphs");
 	vector<vector<bool> > g_mail;
 	vector<vector<bool> > g_phone;
 	vector<int> deg_mail;
 	vector<int> deg_phone;
-	cout<<"here \n"<<g_mail.size()<<endl<<g_phone.size();
-
-	print_matrix(g_phone);
-	print_matrix(g_mail);
+	// cout<<"here \n"<<g_mail.size()<<endl<<g_phone.size();
 
 	g_phone = gboth.first.first;
 	g_mail = gboth.first.second;
@@ -243,6 +328,9 @@ void mainFunction(string filename)
 	deg_mail = gboth.second.second;
 
 	//assign deg_mail and deg_phone change
+	// print_matrix(g_phone);
+	// print_matrix(g_mail);
+
 
 	n = g_mail.size();
 	m = g_phone.size();
@@ -264,7 +352,7 @@ void mainFunction(string filename)
 
 	auto end = std::chrono::system_clock::now();
  
-	cout<<ans;
+	// cout<<ans;
 
     std::chrono::duration<double> elapsed_seconds = end-start;
     std::time_t end_time = std::chrono::system_clock::to_time_t(end);
@@ -282,9 +370,9 @@ void mainFunction(string filename)
 	}
 	
 	//printing in a file
-	int total_vars = n*n + m*m + n*m;
+	int total_vars = m + n*m;
 	ofstream outfile;
-	outfile.open("test.satinput");
+	outfile.open(filename + ".satinput");
 
 	outfile << "c Here is a comment." << endl;
 	outfile << "p cnf " << total_vars << " " << noOfClauses << endl;
@@ -292,9 +380,12 @@ void mainFunction(string filename)
 
 	outfile.close();
 }
-int main(){
-
-	mainFunction("test.graphs");
+int main(int argc, char const *argv[]){
+	// string filename = "";
+	// cin>>filename;
+	cout<<string(argv[1])<<endl;
+	mainFunction(string(argv[1]));
+	
 	return 0;
 }
 
