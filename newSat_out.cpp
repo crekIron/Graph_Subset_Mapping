@@ -188,10 +188,10 @@ void readSatOutput(string filename)
 
 int main(int argc, char const *argv[])
 {
-	std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = start - start; 
+	// std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+    // std::chrono::duration<double> elapsed_seconds = start - start; 
 	readSatOutput(string(argv[1]));
-	elapsed_seconds = elapsed_seconds + std::chrono::system_clock::now()-start;  
-	cout << "elapsed time for reading the output of MiniSat: " << elapsed_seconds.count() << "s\n"; 
+	// elapsed_seconds = elapsed_seconds + std::chrono::system_clock::now()-start;  
+	// cout << "elapsed time for reading the output of MiniSat: " << elapsed_seconds.count() << "s\n"; 
 	return 0;
 }
